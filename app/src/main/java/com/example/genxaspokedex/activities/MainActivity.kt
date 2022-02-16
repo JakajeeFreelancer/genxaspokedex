@@ -4,17 +4,16 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +25,7 @@ import com.example.genxaspokedex.R
 import com.example.genxaspokedex.models.Pokemon
 import com.example.genxaspokedex.viewmodels.PokedexViewModel
 import com.example.genxaspokedex.viewmodels.PokedexViewModelFactory
+import com.google.android.material.textfield.TextInputLayout
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,40 +42,50 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     fun MainActivityCompose(pokedexLiveData: LiveData<List<Pokemon>>) {
-        val pokemons by pokedexLiveData.observeAsState(initial = emptyList())
+        val pokedex by pokedexLiveData.observeAsState(initial = emptyList())
+        MainLayout(pokedex)
+    }
 
-        MaterialTheme {
+    @Composable
+    fun MainLayout(pokemons: List<Pokemon>) {
+        val lightColors = lightColors(
+            primary = Color(0xFFFFFFFF)
+        )
+
+        val darkColors = darkColors(
+            primary = Color(0xFF66ffc7)
+        )
+
+//        val colors = if (isSystemInDarkTheme()) darkColors else lightColors
+        MaterialTheme (colors = lightColors){
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 30.dp, end = 30.dp)
+                    .padding(start = 0.dp, end = 0.dp)
             )
             {
-                Column()
-                {
-                    TextField(
-                        value = "",
-                        onValueChange = {},
-                        label = { Text("Search") }
-                    )
-                }
-                Column()
-                {
-                    //Pokedex(pokemons.toMutableStateList())
-                    Pokedex(pokemons)
-                }
+                
+                TextField(
+                    value = "",
+                    onValueChange = {},
+                    label = { Text("Search") }
+                )
+
+                Pokedex(pokemons)
             }
         }
     }
 
     @Composable
-    fun Pokedex(pokemons: List<Pokemon>?){
-        if(pokemons != null && pokemons.isNotEmpty()) {
+    fun Pokedex(pokemons: List<Pokemon>){
+        if(pokemons.any())
+        {
             Column {
                 pokemons.forEach { pokemon ->
                     PokemonCard(pokemon)
+                    Divider()
                 }
             }
         }
@@ -109,10 +119,7 @@ class MainActivity : AppCompatActivity() {
     @Preview
     @Composable
     fun PreviewActivityLayout() {
-        val mockData : LiveData<List<Pokemon>> = liveData {
-            val pokemonList = listOf( Pokemon( "name1", "url1" ), Pokemon( "name2", "url2" ))
-            emit(pokemonList)
-        }
-        MainActivityCompose(mockData)
+        val mockData : List<Pokemon> = listOf( Pokemon( "name1", "url1" ), Pokemon( "name2", "url2" ))
+        MainLayout(mockData)
     }
 }
