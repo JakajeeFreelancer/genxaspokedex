@@ -2,6 +2,7 @@ package com.example.genxaspokedex.viewmodels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.*
+import com.example.genxaspokedex.models.PokedexResponse
 import com.example.genxaspokedex.repository.PokedexRepository
 import com.example.genxaspokedex.models.Pokemon
 import kotlinx.coroutines.delay
@@ -9,14 +10,10 @@ import kotlinx.coroutines.delay
 
 class PokedexViewModel(private val repository: PokedexRepository) : ViewModel() {
 
-    val pokemons: LiveData<List<Pokemon>> = liveData {
-        val pokemonList = getPokedexData()
-        emit(pokemonList)
-    }
+    val pokedexData: LiveData<PokedexResponse> = repository.getPokedexLiveData()
 
-    suspend fun getPokedexData():List<Pokemon>{
-        delay(2000)
-        return repository.getPokedexData(30)
+    fun getPokedexData(){
+        repository.getPokedexData(30)
     }
 
 }

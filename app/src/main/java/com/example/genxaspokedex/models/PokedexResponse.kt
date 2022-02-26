@@ -1,8 +1,8 @@
 package com.example.genxaspokedex.models
 
 data class PokedexResponse(
-    val count: Int,
-    val next: String,
-    val previous: String,
-    val results: List<Pokemon>
+    var count: Int,
+    var next: String,
+    var previous: String,
+    var results: MutableList<Pokemon>
 )

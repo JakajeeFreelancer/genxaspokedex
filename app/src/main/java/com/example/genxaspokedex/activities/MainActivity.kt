@@ -8,24 +8,27 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.example.genxaspokedex.PokedexApplication
 import com.example.genxaspokedex.R
+import com.example.genxaspokedex.models.PokedexResponse
 import com.example.genxaspokedex.models.Pokemon
 import com.example.genxaspokedex.viewmodels.PokedexViewModel
 import com.example.genxaspokedex.viewmodels.PokedexViewModelFactory
 import com.google.android.material.textfield.TextInputLayout
+import org.intellij.lang.annotations.JdkConstants
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,18 +39,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MainActivityCompose(pokedexViewModel.pokemons)
+            MainActivityCompose(pokedexViewModel.pokedexData)
         }
     }
 
     @Composable
-    fun MainActivityCompose(pokedexLiveData: LiveData<List<Pokemon>>) {
-        val pokedex by pokedexLiveData.observeAsState(initial = emptyList())
+    fun MainActivityCompose(pokedexLiveData: LiveData<PokedexResponse>) {
+        val pokedexState: State<PokedexResponse?> = pokedexLiveData.observeAsState()
+        val pokedex: PokedexResponse? = pokedexState.value
         MainLayout(pokedex)
+
     }
 
     @Composable
-    fun MainLayout(pokemons: List<Pokemon>) {
+    fun MainLayout(pokedex: PokedexResponse?) {
         val lightColors = lightColors(
             primary = Color(0xFFFFFFFF)
         )
@@ -66,28 +71,59 @@ class MainActivity : AppCompatActivity() {
                     .padding(start = 0.dp, end = 0.dp)
             )
             {
-                
+                var text by remember { mutableStateOf(TextFieldValue("")) }
                 TextField(
-                    value = "",
-                    onValueChange = {},
-                    label = { Text("Search") }
+                    value = text,
+                    onValueChange = { newText ->
+                        text = newText
+                        pokedexViewModel.getPokedexData()
+                    },
+                    label = { Text("Search") },
+                    modifier = Modifier.fillMaxWidth()
                 )
-
-                Pokedex(pokemons)
+                if(pokedex == null){
+                    Pokedex(listOf())
+                }
+                else{
+                    Pokedex(pokedex.results)
+                }
             }
         }
     }
 
     @Composable
     fun Pokedex(pokemons: List<Pokemon>){
-        if(pokemons.any())
-        {
-            Column {
-                pokemons.forEach { pokemon ->
-                    PokemonCard(pokemon)
-                    Divider()
+        var rowCount: Int = 1
+        if(pokemons.any()) {
+            pokemons.forEach { pokemon ->
+                val leftAlignment = ((rowCount / 10) % 2 == 0)
+                if(leftAlignment)
+                {
+                    Row(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        PokemonCard(pokemon, leftAlignment)
+                        Divider()
+                    }
                 }
+                else
+                {
+                    Row(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        PokemonCard(pokemon, leftAlignment)
+                        Divider()
+                    }
+                }
+                rowCount += 1
             }
+
         }
         else {
             Text("Data not found")
@@ -95,31 +131,63 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun PokemonCard(pokemon: Pokemon){
-        Row(modifier = Modifier.padding(all = 5.dp)) {
+    fun PokemonCard(pokemon: Pokemon, leftAlignment: Boolean){
+        if(leftAlignment) {
             Image(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
+                    .padding(5.dp)
                     .clip(RectangleShape)
                     .border(1.5.dp, MaterialTheme.colors.secondary, RectangleShape)
             )
             Spacer(modifier = Modifier.width(8.dp))
-
-            Column {
-                Text(
+            Text(
                     text = pokemon.name,//pokemon.name
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.width(100.dp)
                 )
-            }
+        }
+        else {
+            Text(
+                text = pokemon.name,//pokemon.name
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.width(100.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Image(
+                painter = painterResource(R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(5.dp)
+                    .clip(RectangleShape)
+                    .border(1.5.dp, MaterialTheme.colors.secondary, RectangleShape)
+            )
         }
     }
 
     @Preview
     @Composable
     fun PreviewActivityLayout() {
-        val mockData : List<Pokemon> = listOf( Pokemon( "name1", "url1" ), Pokemon( "name2", "url2" ))
+        val mockData : PokedexResponse = PokedexResponse(14,"","",
+            mutableListOf( Pokemon( "name1", "url1" ),
+                Pokemon( "name2", "url2" ),
+                Pokemon( "name3", "url3" ),
+                Pokemon( "name4", "url4" ),
+                Pokemon( "name5", "url5" ),
+                Pokemon( "name6", "url6" ),
+                Pokemon( "name7", "url7" ),
+                Pokemon( "name8", "url8" ),
+                Pokemon( "name9", "url9" ),
+                Pokemon( "name10", "url10" ),
+                Pokemon( "name11", "url11" ),
+                Pokemon( "name12", "url12" ),
+                Pokemon( "name13", "url13" ),
+                Pokemon( "name14", "url14" )
+            )
+        )
         MainLayout(mockData)
     }
 }
