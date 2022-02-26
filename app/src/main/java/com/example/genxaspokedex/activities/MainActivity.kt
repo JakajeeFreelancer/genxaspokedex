@@ -7,7 +7,10 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -17,10 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import coil.compose.rememberImagePainter
+import coil.transform.CircleCropTransformation
 import com.example.genxaspokedex.PokedexApplication
 import com.example.genxaspokedex.R
 import com.example.genxaspokedex.models.PokedexResponse
@@ -68,7 +74,7 @@ class MainActivity : AppCompatActivity() {
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 0.dp, end = 0.dp)
+                    .padding(10.dp)
             )
             {
                 var text by remember { mutableStateOf(TextFieldValue("")) }
@@ -78,8 +84,9 @@ class MainActivity : AppCompatActivity() {
                         text = newText
                         pokedexViewModel.getPokedexData()
                     },
-                    label = { Text("Search") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    leadingIcon = {Icon(Icons.Filled.Search, "", tint = Color.DarkGray)}
                 )
                 if(pokedex == null){
                     Pokedex(listOf())
@@ -96,34 +103,10 @@ class MainActivity : AppCompatActivity() {
         var rowCount: Int = 1
         if(pokemons.any()) {
             pokemons.forEach { pokemon ->
-                val leftAlignment = ((rowCount / 10) % 2 == 0)
-                if(leftAlignment)
-                {
-                    Row(
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        PokemonCard(pokemon, leftAlignment)
-                        Divider()
-                    }
-                }
-                else
-                {
-                    Row(
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        PokemonCard(pokemon, leftAlignment)
-                        Divider()
-                    }
-                }
+                PokemonCard(pokemon, ((rowCount / 10) % 2 == 0))
+                Divider()
                 rowCount += 1
             }
-
         }
         else {
             Text("Data not found")
@@ -133,38 +116,57 @@ class MainActivity : AppCompatActivity() {
     @Composable
     fun PokemonCard(pokemon: Pokemon, leftAlignment: Boolean){
         if(leftAlignment) {
-            Image(
-                painter = painterResource(R.drawable.ic_launcher_foreground),
-                contentDescription = null,
+            Row(
                 modifier = Modifier
-                    .size(40.dp)
-                    .padding(5.dp)
-                    .clip(RectangleShape)
-                    .border(1.5.dp, MaterialTheme.colors.secondary, RectangleShape)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
+                    .padding(10.dp)
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.CenterStart),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Image(
+                    painter = rememberImagePainter(
+                        data = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+                        builder = {
+                            transformations(CircleCropTransformation())
+                        }
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
                     text = pokemon.name,//pokemon.name
                     style = MaterialTheme.typography.body2,
-                    modifier = Modifier.width(100.dp)
+                    modifier = Modifier.weight(1f)
                 )
+            }
         }
         else {
-            Text(
-                text = pokemon.name,//pokemon.name
-                style = MaterialTheme.typography.body2,
-                modifier = Modifier.width(100.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Image(
-                painter = painterResource(R.drawable.ic_launcher_foreground),
-                contentDescription = null,
+            Row(
                 modifier = Modifier
-                    .size(40.dp)
-                    .padding(5.dp)
-                    .clip(RectangleShape)
-                    .border(1.5.dp, MaterialTheme.colors.secondary, RectangleShape)
-            )
+                    .padding(10.dp)
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.CenterEnd),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = pokemon.name,//pokemon.name
+                    style = MaterialTheme.typography.body2,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Image(
+                    painter = rememberImagePainter(
+                        data = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+                        builder = {
+                            transformations(CircleCropTransformation())
+                        }
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
         }
     }
 
