@@ -46,14 +46,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun MainActivityCompose(pokedexLiveData: LiveData<PokedexResponse>) {
-        val pokedexState: State<PokedexResponse?> = pokedexLiveData.observeAsState()
-        val pokedex: PokedexResponse? = pokedexState.value
+    fun MainActivityCompose(pokedexLiveData: LiveData<List<Pokemon>>) {
+        val pokedexState: State<List<Pokemon>?> = pokedexLiveData.observeAsState()
+        val pokedex: List<Pokemon>? = pokedexState.value
         MainLayout(pokedex)
     }
 
     @Composable
-    fun MainLayout(pokedex: PokedexResponse?) {
+    fun MainLayout(pokedex: List<Pokemon>?) {
         MaterialTheme (){
 
             Column(
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                     value = keyword,
                     onValueChange = { newText ->
                         keyword = newText
-                        pokedexViewModel.getPokedexData(100,0)
+                        pokedexViewModel.getPokedexData(100,0,keyword.text)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -84,24 +84,22 @@ class MainActivity : AppCompatActivity() {
                         }
                 )
                 if(pokedex == null){
-                    pokedexViewModel.getPokedexData(100,0)
+                    pokedexViewModel.getPokedexData(100,0,"")
                 }
                 else{
-                    Pokedex(pokedex.results,keyword.text)
+                    Pokedex(pokedex)
                 }
             }
         }
     }
 
     @Composable
-    fun Pokedex(pokemons: List<Pokemon>,keyword: String){
+    fun Pokedex(pokemons: List<Pokemon>){
         var rowCount: Int = 9
         if(pokemons.any()) {
             pokemons.forEach { pokemon ->
-                if(keyword.isNullOrEmpty() || pokemon.name.contains(keyword,true)) {
-                    PokemonCard(pokemon, ((rowCount / 10) % 2 != 0))
-                    rowCount += 1
-                }
+                PokemonCard(pokemon, ((rowCount / 10) % 2 != 0))
+                rowCount += 1
             }
         }
         else {
@@ -182,8 +180,7 @@ class MainActivity : AppCompatActivity() {
     @Preview
     @Composable
     fun PreviewActivityLayout() {
-        val mockData : PokedexResponse = PokedexResponse(14,"","",
-            mutableListOf( Pokemon( "name1", "https://pokeapi.co/api/v2/pokemon/1/" ),
+        val mockData  = mutableListOf( Pokemon( "name1", "https://pokeapi.co/api/v2/pokemon/1/" ),
                 Pokemon( "name2", "https://pokeapi.co/api/v2/pokemon/2/" ),
                 Pokemon( "name3", "https://pokeapi.co/api/v2/pokemon/3/" ),
                 Pokemon( "name4", "https://pokeapi.co/api/v2/pokemon/4/" ),
@@ -198,7 +195,6 @@ class MainActivity : AppCompatActivity() {
                 Pokemon( "name13", "https://pokeapi.co/api/v2/pokemon/13/" ),
                 Pokemon( "name14", "https://pokeapi.co/api/v2/pokemon/14/" )
             )
-        )
         MainLayout(mockData)
     }
 }
