@@ -1,21 +1,15 @@
 package com.example.genxaspokedex.viewmodels
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.*
 import com.example.genxaspokedex.models.PokedexResponse
 import com.example.genxaspokedex.repository.PokedexRepository
-import com.example.genxaspokedex.models.Pokemon
-import kotlinx.coroutines.delay
-
 
 class PokedexViewModel(private val repository: PokedexRepository) : ViewModel() {
-
     val pokedexData: LiveData<PokedexResponse> = repository.getPokedexLiveData()
 
-    fun getPokedexData(){
-        repository.getPokedexData(30)
+    fun getPokedexData(limit: Int?, offset:Int?){
+        repository.getPokedexData(limit,offset)
     }
-
 }
 
 class PokedexViewModelFactory(private val repository: PokedexRepository) : ViewModelProvider.Factory {

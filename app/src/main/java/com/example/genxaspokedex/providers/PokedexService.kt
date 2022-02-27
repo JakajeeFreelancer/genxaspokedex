@@ -11,7 +11,7 @@ import retrofit2.http.Query
 interface PokedexService {
 
     @GET("pokemon?")
-    fun getPokedexData(@Query("limit") limit: Int?): Call<PokedexResponse?>?//Call<List<Pokemon?>?>?
+    fun getPokedexData(@Query("limit") limit: Int?,@Query("offset")offset:Int?): Call<PokedexResponse?>?
 
     companion object {
 
