@@ -2,13 +2,14 @@ package com.example.genxaspokedex.viewmodels
 
 import androidx.lifecycle.*
 import com.example.genxaspokedex.models.PokedexResponse
+import com.example.genxaspokedex.models.Pokemon
 import com.example.genxaspokedex.repository.PokedexRepository
 
 class PokedexViewModel(private val repository: PokedexRepository) : ViewModel() {
-    val pokedexData: LiveData<PokedexResponse> = repository.getPokedexLiveData()
+    val pokedexData: LiveData<List<Pokemon>> = repository.getPokedexLiveData()
 
-    fun getPokedexData(limit: Int?, offset:Int?){
-        repository.getPokedexData(limit,offset)
+    fun getPokedexData(limit: Int?, offset:Int?,keyword:String){
+        repository.getPokedexData(limit,offset,keyword)
     }
 }
 
