@@ -27,7 +27,6 @@ import androidx.lifecycle.LiveData
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.example.genxaspokedex.PokedexApplication
-import com.example.genxaspokedex.models.PokedexResponse
 import com.example.genxaspokedex.models.Pokemon
 import com.example.genxaspokedex.viewmodels.PokedexViewModel
 import com.example.genxaspokedex.viewmodels.PokedexViewModelFactory
@@ -54,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     fun MainLayout(pokedex: List<Pokemon>?) {
-        MaterialTheme (){
+        MaterialTheme {
 
             Column(
                 modifier = Modifier
@@ -95,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     fun Pokedex(pokemons: List<Pokemon>){
-        var rowCount: Int = 9
+        var rowCount = 9
         if(pokemons.any()) {
             pokemons.forEach { pokemon ->
                 PokemonCard(pokemon, ((rowCount / 10) % 2 != 0))

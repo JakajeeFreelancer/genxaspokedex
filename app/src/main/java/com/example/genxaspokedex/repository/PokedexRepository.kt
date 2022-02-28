@@ -18,44 +18,31 @@ class PokedexRepository {
     fun getPokedexData(limit: Int?,offset:Int?,keyword:String) {
 
         val pokedexService = PokedexService.create().getPokedexData(limit,offset)
-        if (pokedexService != null) {
-
-            pokedexService.enqueue( object : Callback<PokedexResponse?> {
-                override fun onResponse(
-                    call: Call<PokedexResponse?>,
-                    response: Response<PokedexResponse?>
-                ) {
-                    if(response.body() != null)
-                    {
-                        var pokemonList : MutableList<Pokemon> = mutableListOf()
-                        if(!keyword.isNullOrEmpty())
-                        {
-                            response.body()?.results?.forEach { pokemon ->
-                                if(pokemon.name.contains(keyword,true)) {
-                                    pokemonList.add(pokemon)
-                                }
+        pokedexService?.enqueue( object : Callback<PokedexResponse?> {
+            override fun onResponse(
+                call: Call<PokedexResponse?>,
+                response: Response<PokedexResponse?>
+            ) {
+                if(response.body() != null) {
+                    val pokemonList : MutableList<Pokemon> = mutableListOf()
+                    if(keyword.isNotEmpty()) {
+                        response.body()?.results?.forEach { pokemon ->
+                            if(pokemon.name.contains(keyword,true)) {
+                                pokemonList.add(pokemon)
                             }
-                            pokedexLiveData.postValue(pokemonList)
                         }
-                        else
-                        {
-                            pokedexLiveData.postValue(response.body()?.results)
-                        }
+                        pokedexLiveData.postValue(pokemonList)
+                    } else {
+                        pokedexLiveData.postValue(response.body()?.results)
                     }
                 }
+            }
 
-                override fun onFailure(call: Call<PokedexResponse?>, t: Throwable) {
-                    val mockData = listOf<Pokemon>()
-                    pokedexLiveData.postValue(mockData)
-                }
-            })
-
-        }
-        else {
-            //var pokemons = listOf( Pokemon( "name1", "url1" ), Pokemon( "name2", "url2" ))
-            ////
-            //return pokemons
-        }
+            override fun onFailure(call: Call<PokedexResponse?>, t: Throwable) {
+                val mockData = listOf<Pokemon>()
+                pokedexLiveData.postValue(mockData)
+            }
+        })
     }
 
     fun getPokedexLiveData(): LiveData<List<Pokemon>> {
